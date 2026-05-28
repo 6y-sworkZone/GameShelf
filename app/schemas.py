@@ -129,6 +129,7 @@ class WishlistItemBase(BaseModel):
     lowest_price: Optional[float] = None
     lowest_price_date: Optional[date] = None
     notes: Optional[str] = None
+    share_token: Optional[str] = None
 
 
 class WishlistItemCreate(WishlistItemBase):
