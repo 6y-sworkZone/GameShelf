@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameShelf - 游戏库存管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #eee;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+        .api-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .api-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 50px;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .feature-card h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .feature-card ul {
+            list-style: none;
+            color: #aaa;
+        }
+        .feature-card li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .feature-card li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #e94560;
+        }
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #666;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 GameShelf</h1>
+            <p class="subtitle">你的专属游戏库存与进度管理系统</p>
+            <a href="/docs" class="api-link">📚 API 文档</a>
+        </header>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>🎯 游戏库管理</h3>
+                <ul>
+                    <li>添加游戏（名称/平台/价格/标签）</li>
+                    <li>多维度搜索筛选</li>
+                    <li>游戏坟场（买了没玩）</li>
+                    <li>分维度打分系统</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>📈 进度追踪</h3>
+                <ul>
+                    <li>游玩状态管理</li>
+                    <li>游玩日记记录</li>
+                    <li>速通记录追踪</li>
+                    <li>通关截图上传</li>
+                    <li>游玩日历视图</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>💝 愿望清单</h3>
+                <ul>
+                    <li>添加心仪游戏</li>
+                    <li>价格监控提醒</li>
+                    <li>史低价格记录</li>
+                    <li>愿望单分享</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>🏆 成就系统</h3>
+                <ul>
+                    <li>成就录入管理</li>
+                    <li>成就完成度统计</li>
+                    <li>白金奖杯追踪</li>
+                    <li>稀有成就展示</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>💰 开销统计</h3>
+                <ul>
+                    <li>平台/年份/月份统计</li>
+                    <li>折扣节省金额</li>
+                    <li>性价比分析</li>
+                    <li>年度预算管理</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>📊 年度回顾</h3>
+                <ul>
+                    <li>年度游戏报告</li>
+                    <li>游玩趋势分析</li>
+                    <li>平台偏好变化</li>
+                    <li>来年游戏计划</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>GameShelf © 2024 | 用 FastAPI + SQLite 打造</p>
+        </footer>
+    </div>
+</body>
+</html>
