@@ -25,7 +25,13 @@ def get_annual_report(year: int, db: Session = Depends(get_db)):
         models.Game.purchase_date < end_date
     ).count()
     
+    completed_game_ids = db.query(models.PlayRecord.game_id).filter(
+        models.PlayRecord.date >= start_date,
+        models.PlayRecord.date < end_date
+    ).distinct().subquery()
+    
     games_completed = db.query(models.Game).filter(
+        models.Game.id.in_(completed_game_ids),
         models.Game.status.in_(["主线通关", "全成就"])
     ).count()
     

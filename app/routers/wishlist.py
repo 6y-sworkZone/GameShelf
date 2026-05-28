@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime
 
 from app.database import get_db
 from app import models, schemas
@@ -99,12 +100,19 @@ def delete_wishlist_item(item_id: int, db: Session = Depends(get_db)):
     return {"message": "已从愿望单移除"}
 
 
-@router.get("/share/{share_id}")
-def share_wishlist(share_id: str, db: Session = Depends(get_db)):
+@router.post("/share/generate")
+def generate_share_link(db: Session = Depends(get_db)):
+    import hashlib
+    timestamp = str(datetime.utcnow().timestamp())
+    share_token = hashlib.md5(timestamp.encode()).hexdigest()[:8]
+    
     items = db.query(models.WishlistItem).order_by(models.WishlistItem.priority.desc()).all()
+    
     return {
-        "share_id": share_id,
-        "generated_at": "now",
+        "share_token": share_token,
+        "share_url": f"/wishlist/share/{share_token}",
+        "generated_at": datetime.utcnow(),
+        "item_count": len(items),
         "items": [
             {
                 "name": item.name,
@@ -112,6 +120,29 @@ def share_wishlist(share_id: str, db: Session = Depends(get_db)):
                 "expected_price": item.expected_price,
                 "expected_discount": item.expected_discount,
                 "current_price": item.current_price
+            }
+            for item in items
+        ]
+    }
+
+
+@router.get("/share/{share_token}")
+def get_shared_wishlist(share_token: str, db: Session = Depends(get_db)):
+    items = db.query(models.WishlistItem).order_by(models.WishlistItem.priority.desc()).all()
+    
+    return {
+        "share_token": share_token,
+        "generated_at": datetime.utcnow(),
+        "item_count": len(items),
+        "message": "这是我的愿望单，欢迎给我送游戏哦！",
+        "items": [
+            {
+                "name": item.name,
+                "platform": item.platform,
+                "expected_price": item.expected_price,
+                "expected_discount": item.expected_discount,
+                "current_price": item.current_price,
+                "store_url": item.store_url
             }
             for item in items
         ]

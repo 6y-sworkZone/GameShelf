@@ -134,6 +134,8 @@ class Friend(Base):
     notes = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    playing = relationship("FriendPlaying", back_populates="friend", cascade="all, delete-orphan")
+
 
 class FriendPlaying(Base):
     __tablename__ = "friend_playing"
@@ -145,6 +147,8 @@ class FriendPlaying(Base):
     status = Column(String)
     last_played = Column(Date)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    friend = relationship("Friend", back_populates="playing")
 
 
 class Budget(Base):

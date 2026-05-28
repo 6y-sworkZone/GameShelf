@@ -49,8 +49,9 @@ def get_play_calendar(year: int, month: Optional[int] = None, db: Session = Depe
         models.PlayRecord.date >= date(year, month or 1, 1)
     )
     if month:
-        next_month = month + 1 if month < 12 else 12
-        query = query.filter(models.PlayRecord.date < date(year, next_month, 1))
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+        query = query.filter(models.PlayRecord.date < date(next_year, next_month, 1))
     else:
         query = query.filter(models.PlayRecord.date < date(year + 1, 1, 1))
     
