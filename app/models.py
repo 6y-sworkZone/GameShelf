@@ -102,6 +102,7 @@ class WishlistItem(Base):
     lowest_price = Column(Float)
     lowest_price_date = Column(Date)
     notes = Column(Text)
+    share_token = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

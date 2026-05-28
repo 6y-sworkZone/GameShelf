@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date
+import hashlib
 
 from app.database import get_db
 from app import models, schemas
@@ -55,58 +56,17 @@ def get_price_alerts(db: Session = Depends(get_db)):
     }
 
 
-@router.get("/{item_id}", response_model=schemas.WishlistItem)
-def get_wishlist_item(item_id: int, db: Session = Depends(get_db)):
-    item = db.query(models.WishlistItem).filter(models.WishlistItem.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="愿望单项目不存在")
-    return item
-
-
-@router.put("/{item_id}", response_model=schemas.WishlistItem)
-def update_wishlist_item(
-    item_id: int,
-    item_update: schemas.WishlistItemUpdate,
-    db: Session = Depends(get_db)
-):
-    db_item = db.query(models.WishlistItem).filter(models.WishlistItem.id == item_id).first()
-    if not db_item:
-        raise HTTPException(status_code=404, detail="愿望单项目不存在")
-    
-    update_data = item_update.model_dump(exclude_unset=True)
-    
-    if "current_price" in update_data:
-        new_price = update_data["current_price"]
-        if db_item.lowest_price is None or new_price < db_item.lowest_price:
-            from datetime import date
-            db_item.lowest_price = new_price
-            db_item.lowest_price_date = date.today()
-    
-    for key, value in update_data.items():
-        setattr(db_item, key, value)
-    
-    db.commit()
-    db.refresh(db_item)
-    return db_item
-
-
-@router.delete("/{item_id}")
-def delete_wishlist_item(item_id: int, db: Session = Depends(get_db)):
-    db_item = db.query(models.WishlistItem).filter(models.WishlistItem.id == item_id).first()
-    if not db_item:
-        raise HTTPException(status_code=404, detail="愿望单项目不存在")
-    db.delete(db_item)
-    db.commit()
-    return {"message": "已从愿望单移除"}
-
-
 @router.post("/share/generate")
 def generate_share_link(db: Session = Depends(get_db)):
-    import hashlib
     timestamp = str(datetime.utcnow().timestamp())
     share_token = hashlib.md5(timestamp.encode()).hexdigest()[:8]
     
     items = db.query(models.WishlistItem).order_by(models.WishlistItem.priority.desc()).all()
+    
+    for item in items:
+        item.share_token = share_token
+    
+    db.commit()
     
     return {
         "share_token": share_token,
@@ -115,6 +75,7 @@ def generate_share_link(db: Session = Depends(get_db)):
         "item_count": len(items),
         "items": [
             {
+                "id": item.id,
                 "name": item.name,
                 "platform": item.platform,
                 "expected_price": item.expected_price,
@@ -128,7 +89,12 @@ def generate_share_link(db: Session = Depends(get_db)):
 
 @router.get("/share/{share_token}")
 def get_shared_wishlist(share_token: str, db: Session = Depends(get_db)):
-    items = db.query(models.WishlistItem).order_by(models.WishlistItem.priority.desc()).all()
+    items = db.query(models.WishlistItem).filter(
+        models.WishlistItem.share_token == share_token
+    ).order_by(models.WishlistItem.priority.desc()).all()
+    
+    if not items:
+        raise HTTPException(status_code=404, detail="分享链接无效或已过期")
     
     return {
         "share_token": share_token,
@@ -160,3 +126,47 @@ def get_wishlist_total_value(db: Session = Depends(get_db)):
         "total_expected_price": round(total_expected, 2),
         "item_count": len(items)
     }
+
+
+@router.get("/{item_id}", response_model=schemas.WishlistItem)
+def get_wishlist_item(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(models.WishlistItem).filter(models.WishlistItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="愿望单项目不存在")
+    return item
+
+
+@router.put("/{item_id}", response_model=schemas.WishlistItem)
+def update_wishlist_item(
+    item_id: int,
+    item_update: schemas.WishlistItemUpdate,
+    db: Session = Depends(get_db)
+):
+    db_item = db.query(models.WishlistItem).filter(models.WishlistItem.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="愿望单项目不存在")
+    
+    update_data = item_update.model_dump(exclude_unset=True)
+    
+    if "current_price" in update_data:
+        new_price = update_data["current_price"]
+        if db_item.lowest_price is None or new_price < db_item.lowest_price:
+            db_item.lowest_price = new_price
+            db_item.lowest_price_date = date.today()
+    
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+    
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+@router.delete("/{item_id}")
+def delete_wishlist_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(models.WishlistItem).filter(models.WishlistItem.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="愿望单项目不存在")
+    db.delete(db_item)
+    db.commit()
+    return {"message": "已从愿望单移除"}
